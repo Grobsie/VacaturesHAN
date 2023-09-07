@@ -64,7 +64,7 @@ public class VacaturesHAN {
             e.printStackTrace();
         }
         
-        //send report
+        //send report (TODO: create a single string and send it with mailer.java via gmail)
         if (vacaturesNew.size() == 1) {
             System.out.println("there is " + vacaturesNew.size() + " new job listing on the HAN website");
         } else {
