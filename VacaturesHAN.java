@@ -1,4 +1,4 @@
-package mail;
+package vacaturesHAN;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,21 +11,31 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 public class VacaturesHAN {
 
     public static void main(String[] args) {
-        //webdriver part using Selenium project
-        WebDriver driver = new ChromeDriver();
-        driver.get("https://www.han.nl/over-de-han/werken-bij-de-han/vacatures/#/");
-        driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));  
-        List<WebElement> vacatures = driver.findElements(By.className("finder-result-wrapper"));
-        
-        // create key:value pairs to store the title and URL of the corresponding job
+    	String emailFrom = "MAILFROM@gmail.com";
+    	String emailPass = "PASSKEY for app";
+    	String emailTo = "MAILTO@gmail.com";
+    	String outputFile = "LOCATION TO WRITE OUTPUT FILE TO";
+    	
+    	String emailHeader;
+    	StringBuilder emailContent = new StringBuilder();
+    	// create key:value pairs to store the title and URL of the corresponding job
         HashMap<String, String> vacaturesSaved = new HashMap<String, String>();
         HashMap<String, String> vacaturesCurrent = new HashMap<String, String>();
         HashMap<String, String> vacaturesNew = new HashMap<String, String>();
+        
+        //webdriver part using Selenium project
+        FirefoxOptions options = new FirefoxOptions();
+        options.addArguments("-headless");
+        WebDriver driver = new FirefoxDriver(options);
+        driver.get("https://www.han.nl/over-de-han/werken-bij-de-han/vacatures/#/");
+        driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));  
+        List<WebElement> vacatures = driver.findElements(By.className("finder-result-wrapper"));
         
         //extract the title and URL from the WebElement to vacaturesCurrent
         for (WebElement i : vacatures) {
@@ -35,7 +45,7 @@ public class VacaturesHAN {
         
         //read the saved data from file to vacaturesSaved, if no file is found it just prints an error
         try {
-            FileInputStream inStream = new FileInputStream("C:/hash.txt");
+            FileInputStream inStream = new FileInputStream(outputFile);
             ObjectInputStream ois = new ObjectInputStream(inStream);
             vacaturesSaved = (HashMap) ois.readObject();
             ois.close();
@@ -55,7 +65,7 @@ public class VacaturesHAN {
         
         //overwrite the saved data with vacaturesCurrent
         try {
-            FileOutputStream outStream = new FileOutputStream("C:/hash.txt");
+            FileOutputStream outStream = new FileOutputStream(outputFile);
             ObjectOutputStream oos = new ObjectOutputStream(outStream);
             oos.writeObject(vacaturesCurrent);
             oos.close();
@@ -64,14 +74,23 @@ public class VacaturesHAN {
             e.printStackTrace();
         }
         
-        //send report (TODO: create a single string and send it with mailer.java via gmail)
+        //report #create header
         if (vacaturesNew.size() == 1) {
-            System.out.println("there is " + vacaturesNew.size() + " new job listing on the HAN website");
+        	emailHeader = "there is " + vacaturesNew.size() + " new job listing on the HAN website";
         } else {
-            System.out.println("there are " + vacaturesNew.size() + " new job listings on the HAN website");
+        	emailHeader = "there are " + vacaturesNew.size() + " new job listings on the HAN website";
         }
+        
+        //report #create content
         for (HashMap.Entry<String, String> entry : vacaturesNew.entrySet()) {
-            System.out.println("--" + entry.toString());
-        }       
+        	emailContent.append("--" + entry.toString() + "\n\n");
+        }
+
+        System.out.println(emailHeader);
+        System.out.println(emailContent.toString());
+        
+        if (vacaturesNew.size() > 1) {
+        	Mailer.send(emailFrom, emailPass, emailTo, emailHeader, emailContent.toString());
+        }
     }
 }
