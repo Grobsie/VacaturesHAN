@@ -1,4 +1,4 @@
-package mail;
+package vacaturesHAN;
 
 import java.util.Properties;    
 import javax.mail.*;    
