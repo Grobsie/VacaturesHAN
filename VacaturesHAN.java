@@ -89,7 +89,7 @@ public class VacaturesHAN {
         System.out.println(emailHeader);
         System.out.println(emailContent.toString());
         
-        if (vacaturesNew.size() > 1) {
+        if (vacaturesNew.size() >= 1) {
         	Mailer.send(emailFrom, emailPass, emailTo, emailHeader, emailContent.toString());
         }
     }
